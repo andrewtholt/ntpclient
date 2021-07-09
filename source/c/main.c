@@ -32,12 +32,26 @@
 #define VN(packet)   (uint8_t) ((packet.li_vn_mode & 0x38) >> 3) // (vn   & 00 111 000) >> 3
 #define MODE(packet) (uint8_t) ((packet.li_vn_mode & 0x07) >> 0) // (mode & 00 000 111) >> 0
 
-void error( char* msg )
-{
+void error( char* msg ) {
     perror( msg ); // Print the error message to stderr.
 
     exit( 0 ); // Quit the process.
 }
+
+void printBits(size_t const size, void const * const ptr) {
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+    
+    for (i = size-1; i >= 0; i--) {
+        for (j = 7; j >= 0; j--) {
+            byte = (b[i] >> j) & 1;
+            printf("%u", byte);
+        }
+    }
+    puts("");
+}
+
 
 int main( int argc, char* argv[ ] ) {
 
@@ -162,8 +176,10 @@ int main( int argc, char* argv[ ] ) {
 
     // Print the time we got from the server, accounting for local timezone and conversion from UTC time.
 
-    printf( "Time: %s", ctime( ( const time_t* ) &txTm ) );
-    printf("Ref=%ud\n", packet.refTm_s);
+    printf("Time    :%s", ctime( ( const time_t* ) &txTm ) );
+    printf("Ref     :%ud\n", packet.refTm_s);
+    printf("Stratum :%04x ", packet.stratum);
+    printBits(sizeof(packet.stratum), &packet.stratum);
 
     return 0;
 }
